@@ -1,8 +1,14 @@
 from django.conf import settings
 from rabbitmq.rabbitmq_connector import connect
 import time
-from vulnvision_service.utils import colors
 
+colors = {
+    "yellow": "\033[1;33m",
+    "green": "\033[1;32m",
+    "cyan": "\033[1;36m",
+    "red": "\033[1;31m",
+    "white": "\033[1;37m"
+}
 class Consume:
     def __init__(self, callback):
         self.callback = callback

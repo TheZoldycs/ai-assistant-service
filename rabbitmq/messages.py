@@ -1,7 +1,8 @@
+from bot.tasks import send_message_to_ai_assistant
 from rabbitmq.consumer import Consume
 import json
 from datetime import datetime
-from service.tasks import create_and_save_scan_object
+
 colors = {
     "yellow": "\033[1;33m",
     "green": "\033[1;32m",
@@ -26,11 +27,11 @@ class MessageProcessing(Consume):
         model = message.get("model")
         receiver = message.get("receiver")
         data = message.get("data")
-        if sender == "BASE_SERVER" and receiver == "ACUNETIX_SERVICE":
-            print("sender == BASE_SERVER and receiver == ACUNETIX_SERVICE is true")
-            if model == "Scan":
-                print("Run create_and_save_scan_object task ..........")
-                task=create_and_save_scan_object.delay(data=data)
+        if sender == "BASE_SERVER" and receiver == "AI_SERVICE":
+            print("sender == BASE_SERVER and receiver == AI is true")
+            if model == "Chat":
+                print("Run send_message_to_ai_assistant task ..........")
+                send_message_to_ai_assistant.delay(data=data)
         # This line is important to consume messages and do not receive them again
         ch.basic_ack(delivery_tag=method.delivery_tag)
     def __init__(self, callback=None):

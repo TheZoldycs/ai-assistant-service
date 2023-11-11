@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "rabbitmq"
+    "rabbitmq",
+    "bot"
 ]
 
 MIDDLEWARE = [
@@ -112,14 +113,21 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#RABBITMQ settings
-
 # RABBITMQ Settings
-
-RABBITMQ_EXCHANGE = "junction2023"
+# Rabbitmq Configuration Options
+RABBITMQ_EXCHANGE = "z_app"
 RABBITMQ_EXCHANGE_TYPE = "fanout"
-RABBITMQ_ROUTING_KEY = "junction2023"
-RABBITMQ_QUEUE = "junction2023_queue"
-RABBITMQ_HOST = config('DJANGO_RABBITMQ_HOST',"127.0.0.1")
-RABBITMQ_USER = config('DJANGO_RABBITMQ_USER',"x")
-RABBITMQ_PASSWORD = config('DJANGO_RABBITMQ_PASSWORD',"x")
+RABBITMQ_ROUTING_KEY = "z_app"
+RABBITMQ_QUEUE = "z_app_chat"
+RABBITMQ_HOST = config('DJANGO_RABBITMQ_HOST')
+RABBITMQ_USER = config('DJANGO_RABBITMQ_USER')
+RABBITMQ_PASSWORD = config('DJANGO_RABBITMQ_PASSWORD')
+#celery settings
+
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_EXTENDED = True
+CELERY_worker_state_db = True
+CELERY_result_persistent=True
+CELERY_RESULT_BACKEND = 'django-db'
