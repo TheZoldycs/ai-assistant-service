@@ -2,7 +2,7 @@ from utils import start_chat
 
 
 start_chat(user_info= {
-    "vegetarian":"no",
+    "vegetarian":"yes",
     "vegan":"no",
     "gluten_free":"no",
     "dairy_free":"no",

@@ -173,6 +173,7 @@ class ConversableAgent(Agent):
         """
         if not isinstance(trigger, (type, str, Agent, Callable, list)):
             raise ValueError("trigger must be a class, a string, an agent, a callable or a list.")
+        print()
         self._reply_func_list.insert(
             position,
             {
@@ -609,6 +610,12 @@ class ConversableAgent(Agent):
         response = oai.ChatCompletion.create(
             context=messages[-1].pop("context", None), messages=self._oai_system_message + messages, **llm_config
         )
+        print("=====================reply ===========================================")
+        reply = oai.ChatCompletion.extract_text_or_function_call(response)[0]
+        print(reply)
+
+        print("====================================================================")
+
         return True, oai.ChatCompletion.extract_text_or_function_call(response)[0]
 
     def generate_code_execution_reply(
@@ -732,7 +739,6 @@ class ConversableAgent(Agent):
         self._consecutive_auto_reply_counter[sender] += 1
         if self.human_input_mode != "NEVER":
             print(colored("\n>>>>>>>> USING AUTO REPLY...", "red"), flush=True)
-
         return False, None
 
     def generate_reply(

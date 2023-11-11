@@ -1,6 +1,6 @@
 import autogen
 from decouple import config
-
+from customize import AssistantAgentCustomized
 #Autogen configuration
 CONFIG_LIST_GRP = [
     {
@@ -19,13 +19,13 @@ user_proxy = autogen.UserProxyAgent(
    human_input_mode="TERMINATE"
 )
 
-food_expert = autogen.AssistantAgent(
+food_expert = AssistantAgentCustomized(
     name="food_expert",
     system_message="Creative and expert in food",
     llm_config=llm_config,
 )
 
-gym_expert = autogen.AssistantAgent(
+gym_expert = AssistantAgentCustomized(
     name="gym_expert",
     system_message="Creative and expert in gym and workout",
     llm_config=llm_config,
@@ -53,5 +53,4 @@ def start_chat(user_info):
         "calories_goal":{user_info["calories_goal"]}Kcal,
         "weight":{user_info["weight"]} kg
     """,
-    silent=True
     )
