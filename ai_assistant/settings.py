@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "rabbitmq"
 ]
 
 MIDDLEWARE = [
@@ -119,6 +120,6 @@ RABBITMQ_EXCHANGE = "junction2023"
 RABBITMQ_EXCHANGE_TYPE = "fanout"
 RABBITMQ_ROUTING_KEY = "junction2023"
 RABBITMQ_QUEUE = "junction2023_queue"
-RABBITMQ_HOST = config('DJANGO_RABBITMQ_HOST')
-RABBITMQ_USER = config('DJANGO_RABBITMQ_USER')
-RABBITMQ_PASSWORD = config('DJANGO_RABBITMQ_PASSWORD')
+RABBITMQ_HOST = config('DJANGO_RABBITMQ_HOST',"127.0.0.1")
+RABBITMQ_USER = config('DJANGO_RABBITMQ_USER',"x")
+RABBITMQ_PASSWORD = config('DJANGO_RABBITMQ_PASSWORD',"x")
