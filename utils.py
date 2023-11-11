@@ -1,26 +1,57 @@
+import autogen
+from decouple import config
 
-from customize import AssistantAgentCustomized,CONFIG_LIST
-from autogen import UserProxyAgent
+#Autogen configuration
+CONFIG_LIST_GRP = [
+    {
+        'model': 'gpt-4',
+        'api_key': config("OPENAI_API_KEY"),
+    },
+]
 
 
-def ask_expert(message):
-    assistant_for_expert = AssistantAgentCustomized(
-        name="assistant_for_expert",
-        llm_config={
-            "temperature": 0,
-            "config_list": CONFIG_LIST,
-        },
+llm_config = {"config_list": CONFIG_LIST_GRP,}
+
+user_proxy = autogen.UserProxyAgent(
+   name="User_proxy",
+   system_message="A human admin.",
+   code_execution_config={"last_n_messages": 2, "work_dir": "groupchat"},
+   human_input_mode="TERMINATE"
+)
+
+food_expert = autogen.AssistantAgent(
+    name="food_expert",
+    system_message="Creative and expert in food",
+    llm_config=llm_config,
+)
+
+gym_expert = autogen.AssistantAgent(
+    name="gym_expert",
+    system_message="Creative and expert in gym and workout",
+    llm_config=llm_config,
+)
+
+#set an advanced ai groupchat 
+groupchat = autogen.GroupChat(agents=[user_proxy, gym_expert, food_expert], messages=[], max_round=12)
+#set a group manager
+manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
+
+
+def start_chat(user_info):
+    """
+    Srarting chat `function`
+    """
+    user_proxy.initiate_chat(
+    manager,
+    message=f"""Get me recommendation food today with this provided information,\n
+        "vegetarian":{user_info["vegetarian"]},
+        "vegan":{user_info["vegan"]},
+        "gluten_free":{user_info["gluten_free"]},
+        "dairy_free":{user_info["dairy_free"]},
+        "nut_allergy":{user_info["nut_allergy"]},
+        "age":{user_info["age"]} years,
+        "calories_goal":{user_info["calories_goal"]}Kcal,
+        "weight":{user_info["weight"]} kg
+    """,
+    silent=True
     )
-    expert = UserProxyAgent(
-        name="expert",
-        human_input_mode="ALWAYS",
-        code_execution_config={"work_dir": "expert"},
-    )
-
-    expert.initiate_chat(assistant_for_expert, message=message)
-    expert.stop_reply_at_receive(assistant_for_expert)
-    # expert.human_input_mode, expert.max_consecutive_auto_reply = "NEVER", 0
-    # final message sent from the expert
-    expert.send("summarize the solution and explain the answer in an easy-to-understand way", assistant_for_expert)
-    # return the last message the expert received
-    return expert.last_message()["content"]
