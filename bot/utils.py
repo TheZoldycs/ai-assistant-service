@@ -1,6 +1,6 @@
 import autogen
 from decouple import config
-from customize import AssistantAgentCustomized, UserProxyAgentJunction2023
+from .customize import AssistantAgentCustomized, UserProxyAgentJunction2023
 #Autogen configuration
 CONFIG_LIST_GRP = [
     {
@@ -10,7 +10,6 @@ CONFIG_LIST_GRP = [
 ]
 
 llm_config = {"config_list": CONFIG_LIST_GRP,}
-
 
 
 def start_chat(user_info,chat_id):

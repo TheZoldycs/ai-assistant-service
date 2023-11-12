@@ -1,6 +1,5 @@
 from celery import shared_task
 from rabbitmq.tasks import publish_message
-from .assistant import start_chat
 from bot.models import Chat,Message
 
 @shared_task(
@@ -31,5 +30,6 @@ def send_message_to_ai_assistant(self,data):
         chat=chat,message=message
     )
     #execute function
+    from .utils import start_chat
     start_chat(user_info=user_info,chat_id=chat_id)
 

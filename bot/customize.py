@@ -34,7 +34,7 @@ class ConversableAgentForJunction2023(ConversableAgent):
         reply = oai.ChatCompletion.extract_text_or_function_call(response)[0]
         send_reply_to_base_server.delay()
         print(reply)
-
+        print(f"chat id == {self.ch}")
         print("====================================================================")
 
         return True, oai.ChatCompletion.extract_text_or_function_call(response)[0]
@@ -66,6 +66,7 @@ class AssistantAgentCustomized(ConversableAgentForJunction2023):
     def __init__(
         self,
         name: str,
+        chat_id:str,
         system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
         llm_config: Optional[Union[Dict, bool]] = None,
         is_termination_msg: Optional[Callable[[Dict], bool]] = None,
@@ -77,6 +78,7 @@ class AssistantAgentCustomized(ConversableAgentForJunction2023):
         super().__init__(
             name,
             system_message,
+            chat_id,
             is_termination_msg,
             max_consecutive_auto_reply,
             human_input_mode,
@@ -95,6 +97,7 @@ class UserProxyAgentJunction2023(ConversableAgentForJunction2023):
     def __init__(
         self,
         name: str,
+        chat_id:str,
         is_termination_msg: Optional[Callable[[Dict], bool]] = None,
         max_consecutive_auto_reply: Optional[int] = None,
         human_input_mode: Optional[str] = "ALWAYS",
@@ -103,11 +106,11 @@ class UserProxyAgentJunction2023(ConversableAgentForJunction2023):
         default_auto_reply: Optional[Union[str, Dict, None]] = "",
         llm_config: Optional[Union[Dict, bool]] = False,
         system_message: Optional[str] = "",
-        chat_id=str # for indexing remote chat 
     ):
 
         super().__init__(
             name,
+            chat_id,
             system_message,
             is_termination_msg,
             max_consecutive_auto_reply,
@@ -116,5 +119,31 @@ class UserProxyAgentJunction2023(ConversableAgentForJunction2023):
             code_execution_config,
             llm_config,
             default_auto_reply,
-            chat_id
         )
+        self.chat_id=chat_id
+    def generate_oai_reply(
+        self,
+        messages: Optional[List[Dict]] = None,
+        sender: Optional[Agent] = None,
+        config: Optional[Any] = None,
+    ) -> Tuple[bool, Union[str, Dict, None]]:
+        """Generate a reply using autogen.oai."""
+        llm_config = self.llm_config if config is None else config
+        if llm_config is False:
+            return False, None
+        if messages is None:
+            messages = self._oai_messages[sender]
+
+        # TODO: #1143 handle token limit exceeded error
+        response = oai.ChatCompletion.create(
+            context=messages[-1].pop("context", None), messages=self._oai_system_message + messages, **llm_config
+        )
+        print("=====================reply ===========================================")
+        reply = oai.ChatCompletion.extract_text_or_function_call(response)[0]
+        send_reply_to_base_server.delay()
+        
+        print(reply)
+        print(f"chat id == {self.chat_id}")
+        print("====================================================================")
+
+        return True, oai.ChatCompletion.extract_text_or_function_call(response)[0]

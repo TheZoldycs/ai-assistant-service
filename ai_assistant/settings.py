@@ -130,4 +130,6 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_RESULT_EXTENDED = True
 CELERY_worker_state_db = True
 CELERY_result_persistent=True
-CELERY_RESULT_BACKEND = 'django-db'
+# Celery Configuration Options
+CELERY_BROKER_URL = f"redis://{config('REDIS_IP_HOST','127.0.0.1')}:6379"
+BROKER_URL = f"redis://{config('REDIS_IP_HOST','127.0.0.1')}:6379"
