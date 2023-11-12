@@ -1,0 +1,78 @@
+version: "3.8"
+
+
+services:
+  # Redis
+  ai_assistant_redis:
+    image: redis:7.2-rc1-alpine
+    container_name: ai_assistant_redis
+
+  # Postgres database
+  ai_assistant_postgres_db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ai_assistant
+      - POSTGRES_USER=ai_assistant
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    container_name: ai_assistant_postgres_db
+
+
+  # ai_assistant service
+  ai_assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai_assistant:latest
+    container_name: ai_assistant
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/ai_assistant
+    ports:
+      - 8000:8000
+    depends_on:
+      - ai_assistant_postgres_db
+      - ai_assistant_redis
+
+  # ai_assistant Celery workers
+  ai_assistant_base_worker:
+    image: ai_assistant:latest
+    container_name: ai_assistant_base_worker
+    restart: always
+    command: celery -A ai_assistant worker -Q subdomains -c 2
+    volumes:
+      - .:/ai_assistant
+    depends_on:
+      - ai_assistant_postgres_db
+      - ai_assistant_redis
+
+
+
+  # ai_assistant RABBITMQ Consumer service
+  ai_assistant_consumer:
+    image: ai_assistant:latest
+    container_name: ai_assistant_consumer
+    restart: always
+    command: python manage.py rabbitmq_consume
+    volumes:
+      - .:/ai_assistant
+    depends_on:
+      - ai_assistant_postgres_db
+      - ai_assistant_redis
+
+  # ai_assistant Channels service
+  ai_assistant_channels:
+    image: ai_assistant:latest
+    container_name: ai_assistant_channels
+    restart: always
+    command: daphne -p 8001 ai_assistant.asgi:application
+    volumes:
+      - .:/ai_assistant
+    ports:
+      - 8001:8001
+    depends_on:
+      - ai_assistant_postgres_db
+      - ai_assistant_redis
